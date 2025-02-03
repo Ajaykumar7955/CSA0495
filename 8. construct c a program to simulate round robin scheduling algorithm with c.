@@ -1,0 +1,77 @@
+#include <stdio.h>
+
+struct Process {
+    int pid;        // Process ID
+    int burst;      // Burst Time
+    int remaining;  // Remaining Burst Time
+    int waiting;    // Waiting Time
+    int turnaround; // Turnaround Time
+};
+
+void roundRobinScheduling(struct Process processes[], int n, int quantum) {
+    int time = 0;
+    int completed = 0;
+
+    while (completed != n) {
+        for (int i = 0; i < n; i++) {
+            if (processes[i].remaining > 0) {
+                if (processes[i].remaining > quantum) {
+                    // Execute the process for the time quantum
+                    time += quantum;
+                    processes[i].remaining -= quantum;
+                    printf("P%d | ", processes[i].pid);
+                } else {
+                    // Execute the remaining burst time
+                    time += processes[i].remaining;
+                    processes[i].remaining = 0;
+                    completed++;
+                    processes[i].turnaround = time;
+                    processes[i].waiting = processes[i].turnaround - processes[i].burst;
+                    printf("P%d (Done) | ", processes[i].pid);
+                }
+            }
+        }
+    }
+
+    // Print the results
+    printf("\n\nProcess ID\tBurst Time\tWaiting Time\tTurnaround Time\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t\t%d\t\t%d\t\t%d\n",
+               processes[i].pid, processes[i].burst, processes[i].waiting, processes[i].turnaround);
+    }
+}
+
+int main() {
+    int n, quantum;
+
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    struct Process processes[n];
+
+    for (int i = 0; i < n; i++) {
+        printf("Enter burst time for process %d: ", i + 1);
+        processes[i].pid = i + 1;
+        scanf("%d", &processes[i].burst);
+        processes[i].remaining = processes[i].burst;
+    }
+
+    printf("Enter time quantum: ");
+    scanf("%d", &quantum);
+
+    roundRobinScheduling(processes, n, quantum);
+
+    return 0;
+}
+OUTPUT:Enter the number of processes: 3
+Enter burst time for process 1: 10
+Enter burst time for process 2: 5
+Enter burst time for process 3: 8
+Enter time quantum: 2
+answer:
+P1 | P2 | P3 | P1 | P2 | P3 | P1 | P3 | P1 | P3 | P1 (Done) | P2 (Done) | P3 (Done) | 
+
+Process ID    Burst Time    Waiting Time    Turnaround Time
+1             10            13              23
+2             5             10              15
+3             8             14              22
